@@ -1,0 +1,23 @@
+[project]
+name = "woohee-hf-upscaler"
+version = "1.0.0"
+description = "Load upscale models directly from Hugging Face Hub in ComfyUI"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "woohee5511", email = "woohee5511@gmail.com" }
+]
+keywords = ["comfyui", "huggingface", "upscale", "upscaler", "image-upscaling"]
+dependencies = [
+    "huggingface-hub>=0.20.0",
+    "torch>=1.11.0"
+]
+
+[tool.comfy]
+PublisherId = "woohee5511"
+DisplayName = "Woohee HF Upscaler Loader"
+Icon = ""
+
+[project.urls]
+Repository = "https://github.com/hw5511/comfyui_hf_upscaler_loader"
