@@ -55,14 +55,16 @@ class UpscaleModelLoaderFromHF:
         return {
             "required": {
                 "repo_name": ("STRING", {
-                    "default": "Phips/2xNomosUni_span_multijpg",
+                    "default": "",
                     "multiline": False
                 }),
                 "filename": ("STRING", {
-                    "default": "2xNomosUni_span_multijpg.pth",
+                    "default": "",
                     "multiline": False
                 }),
-                "api_token": ("STRING", {
+            },
+            "optional": {
+                "subfolder": ("STRING", {
                     "default": "",
                     "multiline": False
                 }),
@@ -73,39 +75,50 @@ class UpscaleModelLoaderFromHF:
     FUNCTION = "load_upscale_model_from_hf"
     CATEGORY = "HF_loaders"
 
-    def load_upscale_model_from_hf(self, repo_name, filename, api_token):
+    def load_upscale_model_from_hf(self, repo_name, filename, subfolder=""):
         """
         Load upscale model from Hugging Face Hub.
 
         Args:
             repo_name (str): Hugging Face repository name
             filename (str): Model file name in the repository
-            api_token (str): Hugging Face API token (optional for public repos)
+            subfolder (str, optional): Subfolder path within the repository
 
         Returns:
             tuple: Loaded upscale model
         """
+        # Normalize subfolder (remove if empty)
+        subfolder_path = subfolder.strip() if subfolder else None
+
+        # Create cache key including subfolder
+        cache_key = (repo_name, filename, subfolder_path)
+
         # Use cached model if available
         if self.loaded_upscale_model is not None:
-            if self.loaded_upscale_model[0] == repo_name and self.loaded_upscale_model[1] == filename:
-                print(f"Using cached upscale model from {repo_name}/{filename}")
-                return (self.loaded_upscale_model[2],)
+            if self.loaded_upscale_model[0] == cache_key:
+                print(f"Using cached upscale model from {repo_name}/{subfolder_path + '/' if subfolder_path else ''}{filename}")
+                return (self.loaded_upscale_model[1],)
             else:
                 # Clear old cache
                 temp = self.loaded_upscale_model
                 self.loaded_upscale_model = None
                 del temp
 
-        # Download from Hugging Face
-        token = api_token if api_token != "" else None
+        # Download from Hugging Face (public repositories only)
         cache_dirs = folder_paths.get_folder_paths(Folders.HF_CACHE_DIR)
 
-        model_path = hf_hub_download(
-            repo_name,
-            filename,
-            token=token,
-            cache_dir=cache_dirs[0]
-        )
+        # Build download parameters
+        download_params = {
+            "repo_id": repo_name,
+            "filename": filename,
+            "cache_dir": cache_dirs[0]
+        }
+
+        # Add subfolder if specified
+        if subfolder_path:
+            download_params["subfolder"] = subfolder_path
+
+        model_path = hf_hub_download(**download_params)
 
         print(f"Loaded upscale model from {model_path}")
 
@@ -122,8 +135,8 @@ class UpscaleModelLoaderFromHF:
         # We'll detect the architecture and load accordingly
         upscale_model = self._initialize_model(sd)
 
-        # Cache the loaded model
-        self.loaded_upscale_model = (repo_name, filename, upscale_model)
+        # Cache the loaded model with cache key
+        self.loaded_upscale_model = (cache_key, upscale_model)
 
         return (upscale_model,)
 

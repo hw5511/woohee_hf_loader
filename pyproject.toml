@@ -1,7 +1,7 @@
 [project]
 name = "woohee-hf-upscaler"
-version = "1.0.0"
-description = "Load upscale models directly from Hugging Face Hub in ComfyUI"
+version = "1.0.2"
+description = "Load upscale models directly from Hugging Face Hub in ComfyUI with subfolder support"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

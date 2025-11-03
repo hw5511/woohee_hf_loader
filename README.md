@@ -38,14 +38,14 @@ Search for "Woohee HF Upscaler Loader" in ComfyUI Manager and install.
 1. Add "Upscale Model Loader From HF" node to your workflow
 2. Enter the Hugging Face repository name (e.g., `Phips/2xNomosUni_span_multijpg`)
 3. Enter the model filename (e.g., `2xNomosUni_span_multijpg.pth`)
-4. (Optional) Enter your Hugging Face API token for private repositories
+4. (Optional) Enter subfolder path if the model is in a subdirectory
 5. Connect the output to an "Upscale Image (using Model)" node
 
 ## Inputs
 
 - **repo_name** (STRING): Hugging Face repository name (e.g., `Phips/2xNomosUni_span_multijpg`)
 - **filename** (STRING): Model file name in the repository (e.g., `2xNomosUni_span_multijpg.pth`)
-- **api_token** (STRING, optional): Hugging Face API token (leave empty for public repos)
+- **subfolder** (STRING, optional): Subfolder path within the repository (e.g., `weights/v2`)
 
 ## Outputs
 
@@ -71,11 +71,18 @@ Load Image -> Upscale Model Loader From HF -> Upscale Image (using Model) -> Sav
 
 ## Changelog
 
+### 1.0.2
+- Removed API token requirement (public repositories only)
+- Added subfolder support for models in subdirectories
+- Improved cache key handling for subfolder paths
+
+### 1.0.1
+- Bug fixes and improvements
+
 ### 1.0.0
 - Initial release
 - Support for loading upscale models from Hugging Face Hub
 - Automatic model caching
-- Support for public and private repositories
 
 ## License
 
