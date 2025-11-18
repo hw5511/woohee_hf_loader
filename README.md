@@ -1,10 +1,13 @@
-# Woohee HF Upscaler Loader
+# Woohee HF Loader
 
-Load upscale models directly from Hugging Face Hub in ComfyUI without manual downloads.
+Load models directly from Hugging Face Hub in ComfyUI without manual downloads.
 
 ## Description
 
-This custom node allows you to load upscale models (ESRGAN, Real-ESRGAN, etc.) directly from Hugging Face repositories into ComfyUI. No need to manually download and place models in your models folder - just provide the repository name and filename!
+This custom node collection allows you to load various models (upscalers, checkpoints, LoRAs, etc.) directly from Hugging Face repositories into ComfyUI. No need to manually download and place models in your models folder - just provide the repository name and filename!
+
+Currently supports:
+- Upscale models (ESRGAN, Real-ESRGAN, etc.)
 
 ## Features
 
@@ -18,14 +21,14 @@ This custom node allows you to load upscale models (ESRGAN, Real-ESRGAN, etc.) d
 
 ### Via ComfyUI Manager
 
-Search for "Woohee HF Upscaler Loader" in ComfyUI Manager and install.
+Search for "Woohee HF Loader" in ComfyUI Manager and install.
 
 ### Manual Installation
 
 1. Navigate to your ComfyUI custom_nodes directory
 2. Clone this repository:
    ```bash
-   git clone https://github.com/hw5511/comfyui_hf_upscaler_loader.git
+   git clone https://github.com/hw5511/woohee_hf_loader.git
    ```
 3. Install dependencies:
    ```bash
@@ -70,6 +73,11 @@ Load Image -> Upscale Model Loader From HF -> Upscale Image (using Model) -> Sav
 - And many more on Hugging Face Hub!
 
 ## Changelog
+
+### 2.0.0
+- Renamed project to "Woohee HF Loader" for broader scope
+- Preparing infrastructure for additional model loaders (checkpoints, LoRAs, etc.)
+- Maintained backward compatibility with existing workflows
 
 ### 1.0.2
 - Removed API token requirement (public repositories only)
