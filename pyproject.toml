@@ -1,6 +1,6 @@
 [project]
 name = "woohee-hf-loader"
-version = "2.2.1"
+version = "2.2.2"
 description = "Load models directly from Hugging Face Hub in ComfyUI - supports UNET, CLIP, VAE, upscalers, GGUF models and more"
 readme = "README.md"
 requires-python = ">=3.9"
