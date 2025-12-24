@@ -145,6 +145,13 @@ GGUF Model Loader From HF -> [Connect to compatible MODEL input nodes]
 
 ## Changelog
 
+### 2.2.1
+- Fixed VAE loader to use `comfy.sd.VAE()` for proper model loading
+- Fixed CLIP loader to use `comfy.sd.load_clip()` with correct parameters
+- Fixed UNET loader to use `comfy.sd.load_unet()` directly
+- Resolved "VAEModelWrapper has no attribute encode" error
+- All loaders now properly handle HuggingFace model paths
+
 ### 2.2.0
 - Added UNET Model Loader From HF node with Qwen Image Layered defaults
 - Added CLIP Model Loader From HF node with Qwen 2.5 VL defaults
