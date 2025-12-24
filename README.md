@@ -7,16 +7,20 @@ Load models directly from Hugging Face Hub in ComfyUI without manual downloads.
 This custom node collection allows you to load various models (upscalers, checkpoints, LoRAs, etc.) directly from Hugging Face repositories into ComfyUI. No need to manually download and place models in your models folder - just provide the repository name and filename!
 
 Currently supports:
+- UNET models (Diffusion models, Qwen Image Layered, etc.)
+- CLIP models (Text encoders, Qwen 2.5 VL, etc.)
+- VAE models (Variational Autoencoders)
 - Upscale models (ESRGAN, Real-ESRGAN, etc.)
 - GGUF models (Quantized models for efficient inference)
 
 ## Features
 
-- Load upscale models and GGUF models directly from Hugging Face Hub
+- Load UNET, CLIP, VAE, upscale, and GGUF models directly from Hugging Face Hub
+- Pre-configured defaults for Qwen Image Layered models
 - Automatic model caching to avoid repeated downloads
 - Support for both public and private repositories (with API token)
 - Compatible with standard ComfyUI model formats
-- Works with ImageUpscaleWithModel node and other ComfyUI nodes
+- Works seamlessly with all ComfyUI model nodes
 
 ## Installation
 
@@ -38,6 +42,34 @@ Search for "Woohee HF Loader" in ComfyUI Manager and install.
 4. Restart ComfyUI
 
 ## Usage
+
+### UNET Model Loader From HF
+
+1. Add "UNET Model Loader From HF" node to your workflow
+2. Default values are pre-configured for Qwen Image Layered model:
+   - repo_name: `Comfy-Org/Qwen-Image-Layered_ComfyUI`
+   - filename: `qwen_image_layered_fp8mixed.safetensors`
+   - subfolder: `split_files/diffusion_models`
+3. Connect the MODEL output to KSampler or other compatible nodes
+
+### CLIP Model Loader From HF
+
+1. Add "CLIP Model Loader From HF" node to your workflow
+2. Default values are pre-configured for Qwen 2.5 VL model:
+   - repo_name: `Comfy-Org/Qwen-Image_ComfyUI`
+   - filename: `qwen_2.5_vl_7b_fp8_scaled.safetensors`
+   - subfolder: `split_files/text_encoders`
+   - type: `qwen_image`
+3. Connect the CLIP output to CLIPTextEncode nodes
+
+### VAE Model Loader From HF
+
+1. Add "VAE Model Loader From HF" node to your workflow
+2. Default values are pre-configured for Qwen Image Layered VAE:
+   - repo_name: `Comfy-Org/Qwen-Image-Layered_ComfyUI`
+   - filename: `qwen_image_layered_vae.safetensors`
+   - subfolder: `split_files/vae`
+3. Connect the VAE output to VAEDecode or VAEEncode nodes
 
 ### Upscale Model Loader From HF
 
@@ -64,10 +96,21 @@ All loaders share the same input structure:
 
 ## Outputs
 
+- **UNET Model Loader**: MODEL output
+- **CLIP Model Loader**: CLIP output
+- **VAE Model Loader**: VAE output
 - **Upscale Model Loader**: UPSCALE_MODEL output
 - **GGUF Model Loader**: MODEL output
 
 ## Example Workflows
+
+### Qwen Image Layered Workflow
+```
+UNET Model Loader From HF -> ModelSamplingAuraFlow
+CLIP Model Loader From HF -> CLIPTextEncode (Positive/Negative)
+VAE Model Loader From HF -> VAEEncode/VAEDecode
+Load Image -> KSampler -> VAEDecode -> Save Image
+```
 
 ### Upscale Workflow
 ```
@@ -87,6 +130,11 @@ GGUF Model Loader From HF -> [Connect to compatible MODEL input nodes]
 
 ## Example Models on Hugging Face
 
+### Qwen Image Layered Models
+- **UNET**: `Comfy-Org/Qwen-Image-Layered_ComfyUI` (split_files/diffusion_models/qwen_image_layered_fp8mixed.safetensors)
+- **CLIP**: `Comfy-Org/Qwen-Image_ComfyUI` (split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)
+- **VAE**: `Comfy-Org/Qwen-Image-Layered_ComfyUI` (split_files/vae/qwen_image_layered_vae.safetensors)
+
 ### Upscale Models
 - `Phips/2xNomosUni_span_multijpg` - High-quality 2x upscaler
 - `ai-forever/Real-ESRGAN` - Popular Real-ESRGAN models
@@ -96,6 +144,13 @@ GGUF Model Loader From HF -> [Connect to compatible MODEL input nodes]
 - Search for more GGUF models on Hugging Face Hub!
 
 ## Changelog
+
+### 2.2.0
+- Added UNET Model Loader From HF node with Qwen Image Layered defaults
+- Added CLIP Model Loader From HF node with Qwen 2.5 VL defaults
+- Added VAE Model Loader From HF node with Qwen Image Layered VAE defaults
+- Pre-configured repository paths and filenames for easy Qwen model loading
+- Enhanced documentation with Qwen Image Layered workflow examples
 
 ### 2.1.0
 - Added GGUF Model Loader From HF node

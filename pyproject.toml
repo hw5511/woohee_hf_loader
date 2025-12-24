@@ -1,14 +1,14 @@
 [project]
 name = "woohee-hf-loader"
-version = "2.1.0"
-description = "Load models directly from Hugging Face Hub in ComfyUI - supports upscalers, GGUF models and more"
+version = "2.2.0"
+description = "Load models directly from Hugging Face Hub in ComfyUI - supports UNET, CLIP, VAE, upscalers, GGUF models and more"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
     { name = "woohee5511", email = "woohee5511@gmail.com" }
 ]
-keywords = ["comfyui", "huggingface", "upscale", "upscaler", "image-upscaling", "gguf", "quantized-models"]
+keywords = ["comfyui", "huggingface", "upscale", "upscaler", "image-upscaling", "gguf", "quantized-models", "unet", "clip", "vae", "qwen"]
 dependencies = [
     "huggingface-hub>=0.20.0",
     "torch>=1.11.0"
