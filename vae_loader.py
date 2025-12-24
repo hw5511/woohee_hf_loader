@@ -9,7 +9,9 @@ import torch
 
 # WanVAE fallback implementation
 # Try to import from ComfyUI first, fallback to embedded version if not available
+# PATCHED: Force using embedded WanVAE for ComfyUI 0.3.62 image_channels compatibility
 try:
+    raise ImportError("Forcing embedded WanVAE for image_channels parameter support")
     from comfy.ldm.wan.vae import WanVAE
     WANVAE_SOURCE = "ComfyUI"
 except ImportError:

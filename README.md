@@ -155,6 +155,13 @@ GGUF Model Loader From HF -> [Connect to compatible MODEL input nodes]
 
 ## Changelog
 
+### 2.2.4
+- **Forced embedded WanVAE usage** for guaranteed ComfyUI v0.3.62 compatibility
+- Fixed `image_channels` parameter error in older ComfyUI versions
+- Bypasses ComfyUI's built-in WanVAE to use embedded implementation
+- Resolves "WanVAE.__init__() got an unexpected keyword argument 'image_channels'" error
+- Ensures 4-channel RGBA support works on all ComfyUI versions (0.3.62+)
+
 ### 2.2.3
 - **Critical bug fix**: Fixed 4-channel VAE loading logic
 - Standard VAE loader now properly skipped when 4-channel WanVAE is detected
