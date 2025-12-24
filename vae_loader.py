@@ -3,6 +3,8 @@ from huggingface_hub import hf_hub_download
 from pathlib import Path
 from typing import Union
 from collections.abc import Iterable
+import comfy.utils
+import comfy.sd
 
 
 class Folders:
@@ -113,21 +115,11 @@ class VAEModelLoaderFromHF:
 
         print(f"Loaded VAE model from {model_path}")
 
-        try:
-            from nodes import VAELoader
+        # Load VAE state dict
+        sd = comfy.utils.load_torch_file(model_path, safe_load=True)
 
-            vae_loader = VAELoader()
-            vae_tuple = vae_loader.load_vae(model_path)
-            vae_model = vae_tuple[0]
-
-        except Exception as e:
-            print(f"Warning: Could not load VAE model with ComfyUI's VAELoader: {e}")
-
-            class VAEModelWrapper:
-                def __init__(self, path):
-                    self.path = path
-
-            vae_model = VAEModelWrapper(model_path)
+        # Create VAE object using ComfyUI's SD module
+        vae_model = comfy.sd.VAE(sd=sd)
 
         self.loaded_vae_model = (cache_key, vae_model)
 

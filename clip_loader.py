@@ -3,6 +3,7 @@ from huggingface_hub import hf_hub_download
 from pathlib import Path
 from typing import Union
 from collections.abc import Iterable
+import comfy.sd
 
 
 class Folders:
@@ -118,21 +119,12 @@ class CLIPModelLoaderFromHF:
 
         print(f"Loaded CLIP model from {model_path}")
 
-        try:
-            from nodes import CLIPLoader
-
-            clip_loader = CLIPLoader()
-            clip_tuple = clip_loader.load_clip(model_path, type=type)
-            clip_model = clip_tuple[0]
-
-        except Exception as e:
-            print(f"Warning: Could not load CLIP model with ComfyUI's CLIPLoader: {e}")
-
-            class CLIPModelWrapper:
-                def __init__(self, path):
-                    self.path = path
-
-            clip_model = CLIPModelWrapper(model_path)
+        # Load CLIP using ComfyUI's SD module
+        clip_model = comfy.sd.load_clip(
+            ckpt_paths=[model_path],
+            embedding_directory=folder_paths.get_folder_paths("embeddings"),
+            clip_type=type
+        )
 
         self.loaded_clip_model = (cache_key, clip_model)
 

@@ -3,6 +3,7 @@ from huggingface_hub import hf_hub_download
 from pathlib import Path
 from typing import Union
 from collections.abc import Iterable
+import comfy.sd
 
 
 class Folders:
@@ -113,21 +114,8 @@ class UNETModelLoaderFromHF:
 
         print(f"Loaded UNET model from {model_path}")
 
-        try:
-            from nodes import UNETLoader
-
-            unet_loader = UNETLoader()
-            model_tuple = unet_loader.load_unet(model_path)
-            unet_model = model_tuple[0]
-
-        except Exception as e:
-            print(f"Warning: Could not load UNET model with ComfyUI's UNETLoader: {e}")
-
-            class UNETModelWrapper:
-                def __init__(self, path):
-                    self.path = path
-
-            unet_model = UNETModelWrapper(model_path)
+        # Load UNET using ComfyUI's SD module
+        unet_model = comfy.sd.load_unet(model_path)
 
         self.loaded_unet_model = (cache_key, unet_model)
 
