@@ -523,115 +523,98 @@ class VAEModelLoaderFromHF:
             else:
                 print(f"[VAELoader] Detected {input_channels}-channel VAE")
 
-        # Try standard loading first
-        try:
-            vae_model = comfy.sd.VAE(sd=sd)
-            if is_4channel_wanvae:
-                print(f"[VAELoader] Successfully loaded 4-channel VAE via standard method!")
-        except Exception as e:
-            print(f"[VAELoader] Standard VAE loading failed: {e}")
+        # For 4-channel WanVAE, skip standard loading and use direct instantiation
+        if is_4channel_wanvae:
+            print(f"\n{'='*60}")
+            print(f"[VAELoader] 4-channel RGBA detected - using direct WanVAE instantiation")
+            print(f"[VAELoader] Bypassing ComfyUI's standard VAE loader")
+            print(f"{'='*60}\n")
 
-            if is_4channel_wanvae:
+            try:
+                # Extract configuration from state dict
+                print(f"[VAELoader] Using WanVAE from: {WANVAE_SOURCE}")
+
+                # Extract configuration from state dict
+                dim = sd["decoder.head.0.gamma"].shape[0]
+                z_dim = 16  # Wan 2.1 default
+
+                print(f"[VAELoader] Creating WanVAE with:")
+                print(f"  - dim: {dim}")
+                print(f"  - z_dim: {z_dim}")
+                print(f"  - image_channels: {input_channels} (4-channel RGBA)")
+
+                # Create WanVAE instance with 4 channels
+                ddconfig = {
+                    "dim": dim,
+                    "z_dim": z_dim,
+                    "dim_mult": [1, 2, 4, 4],
+                    "num_res_blocks": 2,
+                    "attn_scales": [],
+                    "temperal_downsample": [False, True, True],
+                    "dropout": 0.0,
+                    "image_channels": input_channels  # 4 for RGBA!
+                }
+
+                wan_vae = WanVAE(**ddconfig)
+
+                # Load state dict into WanVAE
+                print(f"[VAELoader] Loading state dict into WanVAE...")
+                wan_vae.load_state_dict(sd)
+                wan_vae.eval()
+
+                # Create ComfyUI VAE wrapper
+                print(f"[VAELoader] Creating ComfyUI VAE wrapper...")
+
+                # Create a minimal VAE wrapper that ComfyUI can use
+                class CustomVAEWrapper:
+                    def __init__(self, first_stage_model):
+                        self.first_stage_model = first_stage_model
+                        self.downscale_ratio = 8
+                        self.upscale_ratio = 8
+                        self.latent_channels = z_dim
+                        self.output_channels = input_channels
+                        self.process_input = lambda image: image
+                        self.process_output = lambda image: image
+
+                    def decode(self, samples_in):
+                        return self.first_stage_model.decode(samples_in)
+
+                    def encode(self, pixel_samples):
+                        return self.first_stage_model.encode(pixel_samples)
+
+                    def decode_tiled(self, samples, tile_x=64, tile_y=64, overlap=16):
+                        return self.decode(samples)
+
+                    def encode_tiled(self, pixel_samples, tile_x=512, tile_y=512, overlap=64):
+                        return self.encode(pixel_samples)
+
+                vae_model = CustomVAEWrapper(wan_vae)
+
                 print(f"\n{'='*60}")
-                print(f"[VAELoader] Attempting direct WanVAE instantiation workaround...")
-                print(f"[VAELoader] This will bypass ComfyUI's VAE loader to support 4-channel RGBA")
+                print(f"SUCCESS: 4-channel WanVAE loaded with FULL RGBA support!")
+                print(f"{'='*60}")
+                print(f"Alpha channel: ✅ ENABLED")
+                print(f"Layer decomposition: ✅ FULLY SUPPORTED")
+                print(f"Transparency: ✅ AVAILABLE")
                 print(f"{'='*60}\n")
 
-                try:
-                    # Extract configuration from state dict
-                    print(f"[VAELoader] Using WanVAE from: {WANVAE_SOURCE}")
-
-                    # Extract configuration from state dict
-                    dim = sd["decoder.head.0.gamma"].shape[0]
-                    z_dim = 16  # Wan 2.1 default
-
-                    print(f"[VAELoader] Creating WanVAE with:")
-                    print(f"  - dim: {dim}")
-                    print(f"  - z_dim: {z_dim}")
-                    print(f"  - image_channels: {input_channels} (4-channel RGBA)")
-
-                    # Create WanVAE instance with 4 channels
-                    ddconfig = {
-                        "dim": dim,
-                        "z_dim": z_dim,
-                        "dim_mult": [1, 2, 4, 4],
-                        "num_res_blocks": 2,
-                        "attn_scales": [],
-                        "temperal_downsample": [False, True, True],
-                        "dropout": 0.0,
-                        "image_channels": input_channels  # 4 for RGBA!
-                    }
-
-                    wan_vae = WanVAE(**ddconfig)
-
-                    # Load state dict into WanVAE
-                    print(f"[VAELoader] Loading state dict into WanVAE...")
-                    wan_vae.load_state_dict(sd)
-                    wan_vae.eval()
-
-                    # Create ComfyUI VAE wrapper
-                    print(f"[VAELoader] Creating ComfyUI VAE wrapper...")
-
-                    # Create a minimal VAE wrapper that ComfyUI can use
-                    class CustomVAEWrapper:
-                        def __init__(self, first_stage_model):
-                            self.first_stage_model = first_stage_model
-                            self.downscale_ratio = 8
-                            self.upscale_ratio = 8
-                            self.latent_channels = z_dim
-                            self.output_channels = input_channels
-                            self.process_input = lambda image: image
-                            self.process_output = lambda image: image
-
-                        def decode(self, samples_in):
-                            return self.first_stage_model.decode(samples_in)
-
-                        def encode(self, pixel_samples):
-                            return self.first_stage_model.encode(pixel_samples)
-
-                        def decode_tiled(self, samples, tile_x=64, tile_y=64, overlap=16):
-                            return self.decode(samples)
-
-                        def encode_tiled(self, pixel_samples, tile_x=512, tile_y=512, overlap=64):
-                            return self.encode(pixel_samples)
-
-                    vae_model = CustomVAEWrapper(wan_vae)
-
-                    print(f"\n{'='*60}")
-                    print(f"SUCCESS: 4-channel WanVAE loaded with FULL RGBA support!")
-                    print(f"{'='*60}")
-                    print(f"Alpha channel: ✅ ENABLED")
-                    print(f"Layer decomposition: ✅ FULLY SUPPORTED")
-                    print(f"Transparency: ✅ AVAILABLE")
-                    print(f"{'='*60}\n")
-
-                except ImportError as import_err:
-                    print(f"[VAELoader] Failed to import WanVAE: {import_err}")
-                    raise RuntimeError(
-                        f"\n{'='*60}\n"
-                        f"WANVAE MODULE NOT FOUND\n"
-                        f"{'='*60}\n"
-                        f"ComfyUI's WanVAE module could not be imported.\n"
-                        f"This may indicate a ComfyUI version issue.\n\n"
-                        f"Update ComfyUI to v0.3.76 or later for native support.\n"
-                        f"{'='*60}\n"
-                    )
-                except Exception as workaround_error:
-                    print(f"[VAELoader] Direct WanVAE instantiation failed: {workaround_error}")
-                    import traceback
-                    traceback.print_exc()
-                    raise RuntimeError(
-                        f"\n{'='*60}\n"
-                        f"4-CHANNEL WANVAE WORKAROUND FAILED\n"
-                        f"{'='*60}\n"
-                        f"Could not load 4-channel WanVAE.\n\n"
-                        f"Error: {workaround_error}\n\n"
-                        f"Update ComfyUI to v0.3.76+ for native support.\n"
-                        f"{'='*60}\n"
-                    )
-            else:
-                # Re-raise original error for non-4channel VAE
-                raise
+            except Exception as e:
+                print(f"[VAELoader] Direct WanVAE instantiation failed: {e}")
+                import traceback
+                traceback.print_exc()
+                raise RuntimeError(
+                    f"\n{'='*60}\n"
+                    f"4-CHANNEL WANVAE LOADING FAILED\n"
+                    f"{'='*60}\n"
+                    f"Could not load 4-channel WanVAE.\n\n"
+                    f"Error: {e}\n\n"
+                    f"This may be a ComfyUI version compatibility issue.\n"
+                    f"{'='*60}\n"
+                )
+        else:
+            # Standard VAE loading for non-4channel models
+            print(f"[VAELoader] Using standard ComfyUI VAE loader...")
+            vae_model = comfy.sd.VAE(sd=sd)
 
         self.loaded_vae_model = (cache_key, vae_model)
 
