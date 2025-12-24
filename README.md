@@ -17,6 +17,9 @@ Currently supports:
 
 - Load UNET, CLIP, VAE, upscale, and GGUF models directly from Hugging Face Hub
 - Pre-configured defaults for Qwen Image Layered models
+- **4-channel RGBA VAE support** with embedded WanVAE implementation
+- **ComfyUI v0.3.62+ compatible** - works on older versions without updates
+- **Full alpha channel preservation** for Qwen Image Layered layer decomposition
 - Automatic model caching to avoid repeated downloads
 - Support for both public and private repositories (with API token)
 - Compatible with standard ComfyUI model formats
@@ -70,6 +73,13 @@ Search for "Woohee HF Loader" in ComfyUI Manager and install.
    - filename: `qwen_image_layered_vae.safetensors`
    - subfolder: `split_files/vae`
 3. Connect the VAE output to VAEDecode or VAEEncode nodes
+
+**4-Channel RGBA Support:**
+- Automatically detects and supports 4-channel RGBA VAE models (Qwen Image Layered)
+- Preserves alpha channel for layer decomposition and transparency
+- Uses embedded WanVAE implementation for ComfyUI v0.3.62 compatibility
+- Automatically falls back to embedded version if ComfyUI's WanVAE is unavailable
+- Console output shows: `[VAELoader] Using WanVAE from: Embedded` or `ComfyUI`
 
 ### Upscale Model Loader From HF
 
@@ -144,6 +154,14 @@ GGUF Model Loader From HF -> [Connect to compatible MODEL input nodes]
 - Search for more GGUF models on Hugging Face Hub!
 
 ## Changelog
+
+### 2.2.2
+- **Added 4-channel RGBA VAE support** for Qwen Image Layered models
+- **Embedded WanVAE implementation** for ComfyUI v0.3.62+ compatibility
+- Automatic fallback mechanism: ComfyUI WanVAE → Embedded WanVAE
+- Full alpha channel preservation for layer decomposition functionality
+- Compatible with RunDiffusion and other cloud environments running older ComfyUI versions
+- Source: Alibaba WanVAE from ComfyUI master branch
 
 ### 2.2.1
 - Fixed VAE loader to use `comfy.sd.VAE()` for proper model loading
