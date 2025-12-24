@@ -155,6 +155,13 @@ GGUF Model Loader From HF -> [Connect to compatible MODEL input nodes]
 
 ## Changelog
 
+### 2.2.3
+- **Critical bug fix**: Fixed 4-channel VAE loading logic
+- Standard VAE loader now properly skipped when 4-channel WanVAE is detected
+- Resolved shape mismatch errors (`Error(s) in loading state_dict...`)
+- Direct WanVAE instantiation now triggered immediately for 4-channel models
+- Guaranteed proper RGBA support with alpha channel preservation
+
 ### 2.2.2
 - **Added 4-channel RGBA VAE support** for Qwen Image Layered models
 - **Embedded WanVAE implementation** for ComfyUI v0.3.62+ compatibility
